@@ -9,23 +9,37 @@ using namespace std;
 
 void Solution(string& s)
 {
-    int i, i1, i2;
+    int i, i1, i2, bracket1, bracket2;
     double a, b;
-    queue<int> q_signs, q_brackets;
+    queue<int> q_signs, q_brackets_index;
+    queue<char> q_brackets;
+    bool f = false;
+    char func;
    
     Find_sings_and_brackets(s);
     Check_on_Negative(s);
     for (int l = 0; l < c.signs_index.size(); l++)
         q_signs.push(c.signs_index[l]);
     for (int l = 0; l < c.brackets_index.size();l++)
-        q_brackets.push(c.brackets_index[l]);
+        q_brackets.push(s[c.brackets_index[l]]);
+    for (int l = 0; l < c.brackets_index.size(); l++)
+        q_brackets_index.push(c.brackets_index[l]);
     while (!q_signs.empty())
     {
         i = q_signs.front();
         q_signs.pop();
         i1 = i - 1;
         i2 = i + 1;
-        while (s[i1] >= '0' && s[i1] <= '9' || s[i1] == '.' || s[i1] == 'r'|| s[i1] =='(')
+        if (f && (i < bracket1 || i >= bracket2))
+        {
+            q_brackets_index.pop();
+            q_brackets.pop();
+            f = false;
+            Trigonometry_func(s, func, bracket1);
+        }
+
+        while (s[i1] >= '0' && s[i1] <= '9' || s[i1] == '.' || s[i1] == 'r'|| s[i1] =='('
+            || s[i1] == 'n' || s[i1] == 's' || s[i1] == 'g')
         {
             if (!i1)
             {
@@ -34,11 +48,29 @@ void Solution(string& s)
             }
             i1--;
         }
+        if (i1 > 0)
+        {
+            if (s[i1] == 'i' || s[i1] == 'o' || s[i1] == 't' || s[i1] == 'a')
+            {
+                func = s[i1];
+                f = true;
+                i1++;
+            }
+        }
+        
         i1++;
        
         while (s[i2] >= '0' && s[i2] <= '9' && i2 < s.size() - 1 || s[i2] == '.' || s[i2] == ')')
             i2++;
-        
+       
+        if (q_brackets.front() == '(')
+        {
+            bracket1 = q_brackets_index.front();
+            q_brackets_index.pop();
+            bracket2 = q_brackets_index.front();
+            q_brackets.pop();
+        }
+
         if (c.results.find(i2) != c.results.end() && c.results.find(i1) != c.results.end())
         {
             a = c.results.find(i1)->second;
@@ -95,7 +127,7 @@ void Operations(char s, int i1, double a, double b)
         c.results.insert(make_pair(i1, pow(a, b)));
 }
 
-float Convert_in_number(string& s, int index1, int index2) // преобразует строку в число 
+float Convert_in_number(string& s, int index1, int index2) // ГЇГ°ГҐГ®ГЎГ°Г Г§ГіГҐГІ Г±ГІГ°Г®ГЄГі Гў Г·ГЁГ±Г«Г® 
 {
     int i, j, b = 0;
     double x = 0;
@@ -119,15 +151,15 @@ float Convert_in_number(string& s, int index1, int index2) // преобразует строку
             }
         }
     }
-    if (b) // если число дробное
+    if (b) // ГҐГ±Г«ГЁ Г·ГЁГ±Г«Г® Г¤Г°Г®ГЎГ­Г®ГҐ
         return x / pow(10, b);
     else
         return x;
 }
 
-void Find_brackets(string& s) // поиск скобок записывает индексы в массив
+void Find_brackets(string& s) // ГЇГ®ГЁГ±ГЄ Г±ГЄГ®ГЎГ®ГЄ Г§Г ГЇГЁГ±Г»ГўГ ГҐГІ ГЁГ­Г¤ГҐГЄГ±Г» Гў Г¬Г Г±Г±ГЁГў
 {
-    // запись скобок настроена как приоритетная
+    // Г§Г ГЇГЁГ±Гј Г±ГЄГ®ГЎГ®ГЄ Г­Г Г±ГІГ°Г®ГҐГ­Г  ГЄГ ГЄ ГЇГ°ГЁГ®Г°ГЁГІГҐГІГ­Г Гї
     int i, i1;
     vector<char> brackets;
     vector<int> index;
@@ -156,9 +188,9 @@ void Find_brackets(string& s) // поиск скобок записывает индексы в массив
     }
 }
 
-void Find_signs(string& s, int begin, int end) // поиск мат.знаков записывает индексы в массив
+void Find_signs(string& s, int begin, int end) // ГЇГ®ГЁГ±ГЄ Г¬Г ГІ.Г§Г­Г ГЄГ®Гў Г§Г ГЇГЁГ±Г»ГўГ ГҐГІ ГЁГ­Г¤ГҐГЄГ±Г» Гў Г¬Г Г±Г±ГЁГў
 {
-    // запись знаков в приоритетности
+    // Г§Г ГЇГЁГ±Гј Г§Г­Г ГЄГ®Гў Гў ГЇГ°ГЁГ®Г°ГЁГІГҐГІГ­Г®Г±ГІГЁ
     for (int i = begin; i < end; i++)
         if (s[i] == '^')
             c.signs_index.push_back(i);
@@ -170,7 +202,7 @@ void Find_signs(string& s, int begin, int end) // поиск мат.знаков записывает ин
             c.signs_index.push_back(i);
 }
 
-void Find_sings_and_brackets(string& s) // переделать поиск знаков
+void Find_sings_and_brackets(string& s) // ГЇГҐГ°ГҐГ¤ГҐГ«Г ГІГј ГЇГ®ГЁГ±ГЄ Г§Г­Г ГЄГ®Гў
 {
     int i = 0, i1 = 0, temp = 0;
     vector<int> indexs;
@@ -179,7 +211,7 @@ void Find_sings_and_brackets(string& s) // переделать поиск знаков
     copy_s = s.substr(0, s.size() - 1);
     for (int j = 0; j < c.brackets_index.size(); j++)
         indexs.push_back(c.brackets_index[j]);
-    // поиск знаков в скобках
+    // ГЇГ®ГЁГ±ГЄ Г§Г­Г ГЄГ®Гў Гў Г±ГЄГ®ГЎГЄГ Гµ
     if (!c.brackets_index.empty())
     {
         auto it = indexs.begin();
@@ -211,6 +243,7 @@ void Check_on_Negative(string &s)
     {
         for (int i = 0; i < c.signs_index.size(); i++)
         {
+            it_sign = c.signs_index.begin();
             if (s[c.signs_index[i]] == '-')
             {
                 if (c.signs_index[i] == 0)
@@ -277,4 +310,28 @@ void Check_on_Negative(string &s)
             }
         }
     }
+}
+
+void Trigonometry_func(string &s, char &func, int bracket1)
+{
+    int x = c.results.find(bracket1)->second;
+    bracket1 -= 3;
+    switch (func)
+    {
+    case 'o':
+        c.results.insert(make_pair(bracket1, cos(x)));
+        break;
+    case 'i':
+        c.results.insert(make_pair(bracket1, sin(x)));
+        break;
+    case 'a':
+        c.results.insert(make_pair(bracket1, tan(x)));
+        break;
+    case 't':
+        c.results.insert(make_pair(bracket1, cos(x)/sin(x)));
+        break;
+    }
+    for (int i = bracket1; i < bracket1 + 3; i++)
+        s[i] = 'r';
+    func = 0;
 }
